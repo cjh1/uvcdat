@@ -8398,7 +8398,7 @@ class animate_obj:
    # This will cause the Python program to wait for the create function		#
    # to finish before moving onto the next command line.			#
    ##############################################################################
-   def create( self, parent=None, min=None, max=None, save_file=None, thread_it = 1, rate=5., bitrate=None, ffmpegoptions='' ):
+   def create( self, parent=None, min=None, max=None, save_file=None, thread_it = 1, rate=5., bitrate=None, ffmpegoptions='', do_min_max='yes' ):
       from vcs import minmax
       from numpy.ma import maximum,minimum
       ##from tkMessageBox import showerror
@@ -8431,7 +8431,6 @@ class animate_obj:
 
       # Set up the animation min and max values by changing the graphics method
       # Note: cannot set the min and max values if the default graphics method is set.
-      do_min_max = 'yes'
       try:
          if (parent is not None) and (parent.iso_spacing == 'Log'):
             do_min_max = 'no'
