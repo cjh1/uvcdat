@@ -309,9 +309,15 @@ endif()
 option(CDAT_BUILD_WITH_LIBDRS "Build with DRS file format support (needs to be in /usr/local/lib)" OFF)
 MARK_AS_ADVANCED(CDAT_BUILD_WITH_LIBDRS)
 
+#Added by Charles Doutriaux to turn ON/OFF MPI
+option(CDAT_USE_PARALLEL "Turn ON/OFF use of MPI in UVCDAT" ON)
 # Added by Dave Kindig Tech-X Corp. kindig@txcorp.com
 option(CDAT_BUILD_ESMF_ESMP "Build python version Earth System Modeling Framework" ON)
-option(CDAT_BUILD_ESMF_PARALLEL "Build parallel version of Earth System Modeling Framework library" ON)
+if (CDAT_USE_PARALLEL)
+   option(CDAT_BUILD_ESMF_PARALLEL "Build parallel version of Earth System Modeling Framework library" ON)
+else()
+   set(CDAT_BUILD_ESMF_PARALLEL OFF)
+endif()
 
 # Attempt to find each package on the system
 
@@ -479,8 +485,11 @@ add_cdat_package(NUMPY)
 add_cdat_package(SCIPY)
 #add_cdat_package(ZMQ)
 add_cdat_package(IPYTHON)
-add_cdat_package(OPENMPI)
-add_cdat_package(Mpi4py)
+# Added test use parallel
+if (CDAT_USE_PARALLEL)
+  add_cdat_package(OPENMPI)
+  add_cdat_package(Mpi4py)
+endif()
 
 add_cdat_package(Pmw)
 add_cdat_package(libcf)
@@ -540,7 +549,11 @@ if(CDAT_BUILD_ESMF_ESMP)
  # the following may need to be adjusted on Crays, otherwise the defaults will likely apply
  set(CDAT_BUILD_ESMF_OS "${CMAKE_SYSTEM_NAME}" CACHE STRING "ESMF_OS env variable, may need to change to Unicos on Crays")
  set(CDAT_BUILD_ESMF_COMPILER "gfortran" CACHE STRING "ESMF_COMPILER env variable, choices are gfortran, intel, pgi, g95, or nag")
- set(CDAT_BUILD_ESMF_COMM "openmpi" CACHE STRING "ESMF_COMM env variable, choices are openmpi, mpiuni, mpi, mpich2, or mvapich2")
+ if (CDAT_USE_PARALLEL)
+   set(CDAT_BUILD_ESMF_COMM "openmpi" CACHE STRING "ESMF_COMM env variable, choices are openmpi, mpiuni, mpi, mpich2, or mvapich2")
+ else()
+   set(CDAT_BUILD_ESMF_COMM "mpiuni" CACHE STRING "ESMF_COMM env variable, choices are openmpi, mpiuni, mpi, mpich2, or mvapich2")
+ endif()
  set(CDAT_BUILD_ESMF_ABI "64" CACHE STRING "ESMF_ABI env variable, choices are 32 or 64")
  
  set(TXCMAKE_DIR ${cdat_SOURCE_DIR}/contrib/sciMake)
@@ -696,7 +709,11 @@ set(Pmw_DEPENDENCIES ${pkgconfig_dep} ${Python_dep})
 set(libcf_DEPENDENCIES ${pkgconfig_dep} ${Python_dep} ${NetCDF_dep} ${HDF5_dep} ${CURL_dep} ${zlib_dep})
 # Added by Dave Kindig Tech-X Corp. kindig@txcorp.com
 set(OPENMPI_DEPENDENCIES ${pkgconfig_dep})
-set(ESMF_DEPENDENCIES ${pkgconfig_dep} ${OPENMPI_dep})
+if (CDAT_USE_PARALLEL)
+  set(ESMF_DEPENDENCIES ${pkgconfig_dep} ${OPENMPI_dep})
+else()
+  set(ESMF_DEPENDENCIES ${pkgconfig_dep})
+endif()
 set(ESMP_DEPENDENCIES ${pkgconfig_dep} ${NUMPY_dep} ${Python_dep} ${ESMF_dep})
 set(Cython_DEPENDENCIES ${pkgconfig_dep} ${Python_dep})
 set(Numexpr_DEPENDENCIES ${pkgconfig_dep} ${NUMPY_dep} ${setuptools_dep})
@@ -733,9 +750,9 @@ set(gui_support_DEPENDENCIES ${CDAT_dep})
 # C.Doutriaux Turning off vistrails build from within CDAT not needed
 #set(VisTrails_DEPENDENCIES ${ParaView_dep} ${CDAT_dep})
 set(Matplotlib_DEPENDENCIES ${PyQt_dep} ${Cairo_dep} ${NUMPY_dep} )
-
-set(Mpi4py_DEPENDENCIES ${NUMPY_dep} ${OPENMPI_dep})
-
+if (CDAT_USE_PARALLEL)
+  set(Mpi4py_DEPENDENCIES ${NUMPY_dep} ${OPENMPI_dep})
+endif()
 set(GEOS_DEPENDENCIES ${Matplotlib_dep})
 set(Shapely_DEPENDENCIES ${pkgconfig_dep} ${Python_dep} ${GEOS_dep})
 set(gdal_DEPENDENCIES ${pkgconfig_dep} ${Python_dep} ${NetCDF_dep} ${HDF5_dep} ${CURL_dep} ${zlib_dep} ${jasper_dep} ${setuptools_dep})
