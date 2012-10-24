@@ -710,9 +710,9 @@ set(libcf_DEPENDENCIES ${pkgconfig_dep} ${Python_dep} ${NetCDF_dep} ${HDF5_dep} 
 # Added by Dave Kindig Tech-X Corp. kindig@txcorp.com
 set(OPENMPI_DEPENDENCIES ${pkgconfig_dep})
 if (CDAT_USE_PARALLEL)
-  set(ESMF_DEPENDENCIES ${pkgconfig_dep} ${OPENMPI_dep})
+  set(ESMF_DEPENDENCIES ${pkgconfig_dep} ${Python_dep} ${OPENMPI_dep})
 else()
-  set(ESMF_DEPENDENCIES ${pkgconfig_dep})
+  set(ESMF_DEPENDENCIES ${pkgconfig_dep}) ${Python_dep}
 endif()
 set(ESMP_DEPENDENCIES ${pkgconfig_dep} ${NUMPY_dep} ${Python_dep} ${ESMF_dep})
 set(Cython_DEPENDENCIES ${pkgconfig_dep} ${Python_dep})
