@@ -65,6 +65,7 @@ if not ESMP_HAS_BEEN_INITIALIZED:
     try:
         import ESMP
         ESMP.ESMP_Initialize()
+        ESMP.ESMP_LogSet(False)
         ESMP_HAS_BEEN_INITIALIZED = True
     except:
         pass
