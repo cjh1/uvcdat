@@ -64,8 +64,11 @@ ESMP_HAS_BEEN_INITIALIZED = False
 if not ESMP_HAS_BEEN_INITIALIZED:
     try:
         import ESMP
-        ESMP.ESMP_Initialize()
-        ESMP.ESMP_LogSet(False)
+        # this will turn loggin completely off
+        # once turned off, it cannot be turned on
+        ESMP.ESMP_Initialize(ESMP.ESMP_LOGKIND_NONE)
+        # alternatively, if logging is desired
+        #ESMP.ESMP_Initialize()
         ESMP_HAS_BEEN_INITIALIZED = True
     except:
         pass
