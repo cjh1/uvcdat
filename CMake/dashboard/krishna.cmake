@@ -17,6 +17,3 @@ file(
   CDAT_BUILD_VISIT:BOOL=OFF
   CDAT_DOWNLOADS_SAMPLE_DATA:BOOL=OFF
 ")
-
-# Perform the actual dashboard execution
-include(execute.cmake)
