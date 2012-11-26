@@ -602,6 +602,8 @@ if(CDAT_BUILD_VISIT)
   add_cdat_package(VisIt)
 endif()
 
+add_cdat_package(ZeroMQ)
+
 add_cdat_package(vistrails)
 add_cdat_package(lepl)
 add_cdat_package(Sphinx)
@@ -731,7 +733,6 @@ set(LAPACK_DEPENDENCIES ${pkgconfig_dep})
 set(CLAPACK_DEPENDENCIES ${pkgconfig_dep})
 set(NUMPY_DEPENDENCIES ${pkgconfig_dep} ${Python_dep} ${CLAPACK_dep} ${LAPACK_dep})
 set(SCIPY_DEPENDENCIES ${NUMPY_dep})
-set(ZMQ_DEPENDENCIES)
 set(IPYTHON_DEPENDENCIES ${setuptools_dep} ${ZMQ_dep} ${NUMPY_dep})
 
 set(VTK_DEPENDENCIES ${pkgconfig_dep} ${zlib_deb} ${png_dep} ${jpeg_dep} ${xml_dep})
