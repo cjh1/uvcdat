@@ -604,6 +604,7 @@ endif()
 
 add_cdat_package(ZeroMQ)
 add_cdat_package(PyZeroMQ)
+add_cdat_package(MoleQueue)
 
 add_cdat_package(vistrails)
 add_cdat_package(lepl)
@@ -775,6 +776,8 @@ foreach(package ${external_packages})
 endforeach()
 
 set(PyZeroMQ_DEPENDENCIES  ${Python_dep} ${ZeroMQ_dep})
+set(MoleQueue_DEPENENCIES ${QT_dep} ${ZeroMQ_dep} ${PyZeroMQ_dep})
+
 #-----------------------------------------------------------------------------
 # checked_get
 #-----------------------------------------------------------------------------
