@@ -603,6 +603,7 @@ if(CDAT_BUILD_VISIT)
 endif()
 
 add_cdat_package(ZeroMQ)
+add_cdat_package(PyZeroMQ)
 
 add_cdat_package(vistrails)
 add_cdat_package(lepl)
@@ -773,6 +774,7 @@ foreach(package ${external_packages})
   include(${package})
 endforeach()
 
+set(PyZeroMQ_DEPENDENCIES  ${Python_dep} ${ZeroMQ_dep})
 #-----------------------------------------------------------------------------
 # checked_get
 #-----------------------------------------------------------------------------

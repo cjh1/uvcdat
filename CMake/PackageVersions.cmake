@@ -573,4 +573,11 @@ set(ZEROMQ_GZ zeromq-${ZEROMQ_VERSION}.tar.gz)
 set(ZEROMQ_URL ${LLNL_URL})
 set(ZEROMQ_MD5 05fc17610630e952d29efe7564828888)
 
+set(PYZMQ_MAJOR 2)
+set(PYZMQ_MINOR 2)
+set(PYZMQ_PATCH 0.1)
+set(PYZMQ_VERSION ${PYZMQ_MAJOR}.${PYZMQ_MINOR}.${PYZMQ_PATCH})
+set(PYZMQ_GZ pyzmq-${PYZMQ_VERSION}.tar.gz)
+set(PYZMQ_URL https://github.com/zeromq/pyzmq/downloads)
+set(PYZMQ_MD5 aa7e672e827292da806c9e554f43517f)
 
