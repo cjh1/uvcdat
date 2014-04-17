@@ -352,6 +352,11 @@ set(external_packages)
 set(found_system_include_dirs)
 set(found_system_libraries)
 
+function(cdat_module name)
+  include(${name}_pkg)
+    
+endfunction()
+
 include(basemap_pkg)
 include(cairo_pkg)
 include(cdat_pkg)

@@ -1,0 +1,8 @@
+function(python_package_version pkg version)
+  execute_process(COMMAND ${PYTHON_EXECUTABLE} "${cdat_CMAKE_SOURCE_DIR}/version.py" ${pkg} RESULT_VARIABLE _res OUTPUT_VARIABLE _version)
+  if (NOT _res)
+    set(${version} ${_version} PARENT_SCOPE)
+  else()
+    set(${version} "${pkg}-NOTFOUND" PARENT_SCOPE)
+  endif()
+endfunction()

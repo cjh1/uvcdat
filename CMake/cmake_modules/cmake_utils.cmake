@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 2.8.8)
 
+include(PythonPackageInfo)
+
 # Usage: add_cdat_package(package_name version_string optional default)
 #-----------------------------------------------------------------------------
 macro (add_cdat_package package_name version_string msg default)
@@ -27,75 +29,92 @@ macro (add_cdat_package package_name version_string msg default)
     set(option_default ${default})
   endif()
 
-  # Check if package is optional, and if yes populate the GUI appropriately
-  option(CDAT_BUILD_${uc_package} "${message}" ${option_default})
-  mark_as_advanced(CDAT_BUILD_${uc_package})
+  # If this is the first configure or CDAT_BUILD_XXX is off then look for a
+  # suitable Python package in our current Python environment.
+  if(NOT ${CDAT_BUILD_${uc_package}})
+    # First see if we already have an adequate version of the package install.
+    unset(_installed_version)
+    python_package_version(${package_name} _installed_version)
 
-  #  If this is an optional package
-  if(NOT "" STREQUAL "${default}")
-    # Find system package first and if it exits provide an option to use
-    # system package
-    if(DEFINED version)
-      find_package(${package_name} ${version} QUIET)
-    else()
-      find_package(${package_name} QUIET)
+    set(_tmp ${version_string})
+    if(NOT "" STREQUAL "${version_string}" AND _installed_version)
+      if(_installed_version VERSION_EQUAL version_string OR
+         _installed_version VERSION_GREATER version_string)
+        message("[INFO] We have ${package_name} ${_installed_version} installed")
+        set(${package_name}_system_package_found 1)
+        option(CDAT_USE_SYSTEM_${uc_package} "${use_system_message}" ON)
+        option(CDAT_BUILD_${uc_package} "${message}" OFF)
+        mark_as_advanced(CDAT_BUILD_${uc_package})
+      endif()
     endif()
-
-    mark_as_advanced(CLEAR CDAT_BUILD_${uc_package})
-
-    if(${package_name}_FOUND OR ${uc_package}_FOUND)
-      set(cdat_${package_name}_FOUND ON)
-    endif()
-
-    option(CDAT_USE_SYSTEM_${uc_package} "${use_system_message}" OFF)
-
-    # If system package is found and can cdat build package option is OFF
-    # then cdat use system package should be ON
-    if(cdat_${package_name}_FOUND AND NOT CDAT_BUILD_${uc_package})
-      set(CDAT_USE_SYSTEM_${uc_package} ON CACHE BOOL "${use_system_message}" FORCE)
-    endif()
-
-    # If system package is not found or cdat build package option is ON
-    # then cdat use system option should be OFF
-    if(NOT cdat_${package_name}_FOUND OR CDAT_BUILD_${uc_package})
-      set(CDAT_USE_SYSTEM_${uc_package} OFF CACHE BOOL "${use_system_message}" FORCE)
-    endif()
-
   endif()
 
-  if(NOT cdat_${package_name}_FOUND)
-    mark_as_advanced(${package_name}_DIR)
+
+  # If install version of Python package was not found.
+  if (NOT ${package_name}_system_package_found)
+    # Check if package is optional, and if yes populate the GUI appropriately
+    option(CDAT_BUILD_${uc_package} "${message}" ${option_default})
+    mark_as_advanced(CDAT_BUILD_${uc_package})
+
+    #  If this is an optional package
+    if(NOT "" STREQUAL "${default}")
+      # Find system package first and if it exits provide an option to use
+      # system package
+      if(DEFINED version)
+        find_package(${package_name} ${version} QUIET)
+      else()
+        find_package(${package_name} QUIET)
+      endif()
+
+      mark_as_advanced(CLEAR CDAT_BUILD_${uc_package})
+
+      if(${package_name}_FOUND OR ${uc_package}_FOUND)
+        set(cdat_${package_name}_FOUND ON)
+      endif()
+
+      option(CDAT_USE_SYSTEM_${uc_package} "${use_system_message}" OFF)
+
+      # If system package is found and can cdat build package option is OFF
+      # then cdat use system package should be ON
+      if(cdat_${package_name}_FOUND AND NOT CDAT_BUILD_${uc_package})
+        set(CDAT_USE_SYSTEM_${uc_package} ON CACHE BOOL "${use_system_message}" FORCE)
+      endif()
+
+      # If system package is not found or cdat build package option is ON
+      # then cdat use system option should be OFF
+      if(NOT cdat_${package_name}_FOUND OR CDAT_BUILD_${uc_package})
+        set(CDAT_USE_SYSTEM_${uc_package} OFF CACHE BOOL "${use_system_message}" FORCE)
+      endif()
+    endif()
+
+    if(NOT cdat_${package_name}_FOUND)
+      mark_as_advanced(${package_name}_DIR)
+    endif()
   endif()
 
   # Check if package is found, if not found or found but user prefers to use cdat package
   # then use cdat package or else use system package
   if(NOT CDAT_USE_SYSTEM_${uc_package})
-
-      list(APPEND external_packages "${package_name}")
-      set(${lc_package}_pkg "${package_name}")
-
+    list(APPEND external_packages "${package_name}")
+    set(${lc_package}_pkg "${package_name}")
   else()
+    message("[INFO] Removing external package ${package_name}")
+    unset(${lc_package}_pkg)
+    if(external_packages)
+      list(REMOVE_ITEM external_packages ${package_name})
+    endif()
 
-    if(CDAT_USE_SYSTEM_${uc_package})
-      message("[INFO] Removing external package ${package_name}")
-      unset(${lc_package}_pkg)
-      if(external_packages)
-        list(REMOVE_ITEM external_packages ${package_name})
-      endif()
+    if(${uc_package}_INCLUDE_DIR)
+      list(APPEND found_system_include_dirs ${${uc_package}_INCLUDE_DIR})
+      message("[INFO] Including: ${uc_package}_INCLUDE_DIR: ${${uc_package}_INCLUDE_DIR}")
+    endif()
 
-      if(${uc_package}_INCLUDE_DIR)
-        list(APPEND found_system_include_dirs ${${uc_package}_INCLUDE_DIR})
-        message("[INFO] Including: ${uc_package}_INCLUDE_DIR: ${${uc_package}_INCLUDE_DIR}")
-      endif()
-
-      if(${uc_package}_LIBRARY)
-        get_filename_component(lib_path ${${uc_package}_LIBRARY} PATH)
-        list(APPEND found_system_libraries ${lib_path})
-        message("[INFO]  Linking: ${uc_package}_LIBRARY: ${lib_path}")
-      endif()
-    endif() # use system package
-
-  endif()
+    if(${uc_package}_LIBRARY)
+      get_filename_component(lib_path ${${uc_package}_LIBRARY} PATH)
+      list(APPEND found_system_libraries ${lib_path})
+      message("[INFO]  Linking: ${uc_package}_LIBRARY: ${lib_path}")
+    endif()
+  endif() # use system package
 endmacro()
 
 #-----------------------------------------------------------------------------
@@ -136,13 +155,13 @@ macro(add_cdat_package_dependent package_name version build_message value depend
   string(TOUPPER ${package_name} uc_package)
   string(TOLOWER ${package_name} lc_package)
 
-  cmake_dependent_option(CDAT_BUILD_${uc_package} "${message}" ${value} "${dependencies}" ${default})
-
   # We need this internal variable so that we can diffrentiate between the
   # the case where use has chosen to turn off this packge vs when the packge is
   # evaluated to turn off by cmake dependent option
   cmake_dependent_option(cdat_build_internal_${uc_package} "${message}" ${value} "${dependencies}" ${default})
   set(CACHE cdat_build_internal_${uc_package} PROPERTY TYPE INTERNAL)
+
+  cmake_dependent_option(CDAT_BUILD_${uc_package} "${message}" ${value} "${dependencies}" ${default})
 
   if (cdat_build_internal_${uc_package})
     add_cdat_package("${package_name}" "${version}" "${build_message}" ${CDAT_BUILD_${uc_package}})
